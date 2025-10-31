@@ -1,0 +1,39 @@
+name: CI (Python 3.9)
+
+on:
+  push:
+    branches: [ master, main, edits ]
+  pull_request:
+    branches: [ master, main, edits ]
+
+jobs:
+  install-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install pinned requirements
+        run: python -m pip install -r requirements.txt --prefer-binary
+
+      - name: Smoke test imports
+        run: |
+          python - <<'PY'
+          import sys
+          try:
+              import requests
+              import bs4
+              import tqdm
+          except Exception as e:
+              print('Import failure:', e)
+              sys.exit(1)
+          print('All imports OK')
+          PY
